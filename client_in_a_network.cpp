@@ -38,27 +38,27 @@ int main() {
     while (true) {
         cout << "Enter a message (or 'exit' to quit): ";
         cin.getline(buffer, sizeof(buffer));
-        
+
         if (strcmp(buffer, "exit") == 0) {
-            break;
+            break; // Exit the loop and close the connection
         }
 
         send(clientSocket, buffer, strlen(buffer), 0);
-        
+
         memset(buffer, 0, sizeof(buffer));
         int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
         if (bytesRead == -1) {
             cerr << "Error reading from server." << endl;
-            break;
+            break; // Exit the loop and close the connection
         }
         if (bytesRead == 0) {
             cout << "Server disconnected." << endl;
-            break;
+            break; // Exit the loop and close the connection
         }
         cout << "Server response: " << buffer << endl;
     }
 
-    // Close the socket
+    // Close the client socket
     close(clientSocket);
 
     return 0;
