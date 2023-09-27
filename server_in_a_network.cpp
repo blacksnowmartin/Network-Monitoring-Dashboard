@@ -34,41 +34,44 @@ int main() {
 
     cout << "Server listening on port 12345..." << endl;
 
-    // Accept incoming connections
-    int clientSocket;
-    sockaddr_in clientAddress;
-    socklen_t clientAddressLength = sizeof(clientAddress);
-
-    clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength);
-    if (clientSocket == -1) {
-        cerr << "Error accepting client connection." << endl;
-        close(serverSocket);
-        return 1;
-    }
-
-    cout << "Client connected." << endl;
-
-    // Communication loop
-    char buffer[256];
     while (true) {
-        memset(buffer, 0, sizeof(buffer));
-        int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
-        if (bytesRead == -1) {
-            cerr << "Error reading from client." << endl;
-            break;
-        }
-        if (bytesRead == 0) {
-            cout << "Client disconnected." << endl;
-            break;
-        }
-        cout << "Received: " << buffer << endl;
+        // Accept incoming connections
+        int clientSocket;
+        sockaddr_in clientAddress;
+        socklen_t clientAddressLength = sizeof(clientAddress);
 
-        // Echo the message back to the client
-        send(clientSocket, buffer, bytesRead, 0);
+        clientSocket = accept(serverSocket, (struct sockaddr*)&clientAddress, &clientAddressLength);
+        if (clientSocket == -1) {
+            cerr << "Error accepting client connection." << endl;
+            continue; // Continue listening for other connections
+        }
+
+        cout << "Client connected." << endl;
+
+        // Communication loop for each client
+        char buffer[256];
+        while (true) {
+            memset(buffer, 0, sizeof(buffer));
+            int bytesRead = recv(clientSocket, buffer, sizeof(buffer), 0);
+            if (bytesRead == -1) {
+                cerr << "Error reading from client." << endl;
+                break; // Exit the loop and disconnect
+            }
+            if (bytesRead == 0) {
+                cout << "Client disconnected." << endl;
+                break; // Exit the loop and disconnect
+            }
+            cout << "Received: " << buffer << endl;
+
+            // Echo the message back to the client
+            send(clientSocket, buffer, bytesRead, 0);
+        }
+
+        // Close the client socket
+        close(clientSocket);
     }
 
-    // Close sockets
-    close(clientSocket);
+    // Close the server socket (this part is unreachable in this example)
     close(serverSocket);
 
     return 0;
